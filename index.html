@@ -169,8 +169,8 @@
 
     /* Fuldraw */
     .showcase { display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center; }
-    .showcase ul { padding-left: 1.2em; color: var(--muted); font-size: 1.1rem; margin-bottom: 8px; }
-    .showcase li { margin-bottom: 6px; }
+    .h-link { text-decoration: none; }
+    @media (hover: hover) and (pointer: fine) { .h-link:hover { color: var(--accent); } }
     .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .shot {
       border: 3px solid var(--line); border-radius: 16px; overflow: hidden; aspect-ratio: 16/10;
@@ -307,16 +307,10 @@
     <section id="fuldraw">
       <div class="wrap showcase">
         <div>
-          <h2>Fuldraw</h2>
-          <!-- EDIT: describe Fuldraw -->
-          <p class="lede" style="margin-top:0">One or two sentences about what Fuldraw is and why people should try it.</p>
-          <ul>
-            <li>Cool feature number one</li>
-            <li>Cool feature number two</li>
-            <li>Cool feature number three</li>
-          </ul>
+          <h2><a class="h-link" href="https://fuldraw.com" target="_blank" rel="noopener">Fuldraw</a></h2>
+          <p class="lede" style="margin-top:0">A drawing game for professionals.</p>
           <div class="btns">
-            <a class="btn btn-primary" href="https://fuldraw.com" target="_blank" rel="noopener">Try Fuldraw</a>
+            <a class="btn btn-primary" href="https://fuldraw.com" target="_blank" rel="noopener">Try it now</a>
           </div>
         </div>
         <!-- Filled live from Fuldraw's Community Spotlight (see script at the bottom) -->
