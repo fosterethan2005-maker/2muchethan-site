@@ -40,6 +40,7 @@
       --line: #fff8ef;
     }
     * { box-sizing: border-box; margin: 0; }
+    html, body { overflow-x: clip; }   /* full-width carousels never cause sideways page scrolling */
     body {
       background: var(--bg);
       color: var(--ink);
@@ -113,7 +114,6 @@
     /* Sections */
     section { padding: 72px 0; }
     h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 28px; }
-    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
     .video {
       background: var(--card); border: 3px solid var(--line); border-radius: 18px;
       overflow: hidden; box-shadow: 6px 6px 0 var(--line);
@@ -147,7 +147,6 @@
     .ticker + section { border-top: 0; padding-top: 40px; }
 
     /* Streams: one row, the next stream first and bigger (with a thumbnail) */
-    .schedule { display: grid; gap: 18px; align-items: stretch; grid-template-columns: minmax(0, 2fr) repeat(var(--later, 3), minmax(0, 1fr)); }
     .slot { border: 3px solid var(--line); border-radius: 16px; padding: 18px 20px; background: var(--bg); }
     .slot .day { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
     .slot .time { font-weight: 700; margin-top: 2px; }
@@ -168,12 +167,9 @@
     .slot.later { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
     .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; margin-right: 8px; animation: pulse 1.4s infinite; }
     @keyframes pulse { 50% { opacity: .25; } }
-    @media (max-width: 720px) { .schedule { grid-template-columns: 1fr; } .slot.later { display: grid; grid-template-columns: 9.5rem 1fr; align-items: baseline; padding: 16px; } .slot.later .day { font-size: 1.1rem; } .slot.later .time { white-space: nowrap; } .slot.later > * { min-width: 0; } }
-    @media (max-width: 400px) { .slot.later { grid-template-columns: 1fr; gap: 4px; } }
 
     /* Merch */
     .badge { background: var(--accent-2); color: var(--on-accent-2); border: 3px solid var(--line); border-radius: 999px; padding: 6px 16px; font-weight: 800; transform: rotate(-3deg); }
-    .merch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
     .product { border: 3px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--bg); box-shadow: 6px 6px 0 var(--line); }
     .pimg {
       aspect-ratio: 1; display: grid; place-items: center; font-size: 5rem; font-weight: 800; color: var(--muted);
@@ -188,13 +184,11 @@
     .section-head:has(.sub) > div { flex: 1; min-width: 0; }
     .section-head:has(.sub) > .btn { flex: none; margin-top: 6px; }
     .h-link { text-decoration: none; }
-    .shots { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
     .shot {
       border: 3px solid var(--line); border-radius: 16px; overflow: hidden; aspect-ratio: 16/10;
       background: repeating-linear-gradient(-45deg, var(--accent-2) 0 16px, var(--accent-2-soft) 16px 32px);
       display: grid; place-items: center; color: var(--on-accent-2); font-weight: 800; box-shadow: 5px 5px 0 var(--line);
     }
-    .shot:first-child { grid-row: span 2; aspect-ratio: auto; }
     .shot img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
     a.shot { position: relative; text-decoration: none; background: #fff; }
     a.shot .cap {
@@ -208,9 +202,8 @@
     @media (prefers-reduced-motion: reduce) { .shot.loading { animation: none; } }
 
     /* Fan art */
-    .fanart { columns: 3 240px; column-gap: 18px; }
     .art {
-      break-inside: avoid; margin-bottom: 18px; border: 3px solid var(--line); border-radius: 16px;
+      border: 3px solid var(--line); border-radius: 16px;
       overflow: hidden; background: var(--card); width: 100%; padding: 0; cursor: zoom-in;
       font: inherit; color: inherit; text-align: left; display: block;
     }
@@ -233,6 +226,40 @@
     dialog p { padding: 12px 16px; font-weight: 700; display: flex; justify-content: space-between; gap: 12px; }
     dialog button { font: inherit; font-weight: 800; background: none; border: 0; color: var(--accent); cursor: pointer; }
 
+    /* Carousels: every section's media is one sideways-scrolling row */
+    .carousel-shell { position: relative; }
+    .carousel {
+      display: flex; gap: 18px; overflow-x: auto; overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory; scrollbar-width: none;
+      /* run edge to edge of the screen, with the first card lined up with the heading */
+      --bleed: max(20px, calc(50vw - 520px));   /* 520px = half the 1040px content width */
+      margin-inline: calc(-1 * var(--bleed)); padding: 4px var(--bleed) 14px; scroll-padding-inline: var(--bleed);
+      align-items: flex-start;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel > * { flex: 0 0 min(var(--card-w, 300px), 82vw); scroll-snap-align: start; }
+    #fanart { --card-w: 320px; }
+    #schedule { --card-w: 196px; align-items: stretch; }
+    #schedule > .next { flex-basis: min(420px, 86vw); }
+    .merch-grid { --card-w: 240px; }
+    #shots { --card-w: 380px; }
+    #video-grid { --card-w: 320px; }
+    .car-btn { display: none; }
+    @media (hover: hover) and (pointer: fine) {
+      .car-btn {
+        display: grid; place-items: center; position: absolute; top: 50%; z-index: 2;
+        width: 44px; height: 44px; margin-top: -29px; border-radius: 50%; border: 0; cursor: pointer;
+        background: var(--ink); color: var(--bg); transition: transform .15s ease-out;
+        user-select: none;
+      }
+      .car-btn svg { width: 22px; height: 22px; }
+      .car-btn.prev { left: -14px; }
+      .car-btn.next { right: -14px; }
+      .car-btn:hover { transform: scale(1.06); }
+      .car-btn:active { transform: scale(.94); }
+      .car-btn[hidden] { display: none; }
+    }
+
     footer { border-top: 3px solid var(--line); padding: 28px 0; color: var(--muted); }
     footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -242,12 +269,6 @@
       .section-head { gap: 10px; }
       .section-head h2 { font-size: 1.75rem; }
       .section-head .btn { padding: 8px 14px; font-size: .85rem; }
-      .fanart { columns: 2; column-gap: 12px; }
-      .fanart:has(.embed, .post, .link) { columns: 1; }
-      .art { margin-bottom: 12px; }
-      .art .ph { max-height: 180px; }
-      .shots { grid-template-columns: 1fr 1fr; }
-      .shot:first-child { grid-row: auto; grid-column: 1 / -1; aspect-ratio: 16 / 10; }
     }
   </style>
 </head>
@@ -293,7 +314,7 @@
           <a class="btn btn-primary" href="mailto:hello@2muchethan.com?subject=My%20creation">Submit your creation</a>
         </div>
         <!-- Posts come from COMMUNITY in the script at the bottom -->
-        <div class="fanart" id="fanart"></div>
+        <div class="fanart carousel" id="fanart"></div>
       </div>
     </section>
 
@@ -301,7 +322,7 @@
       <div class="wrap">
         <h2>Stream schedule</h2>
         <!-- Edit STREAMS in the script at the bottom. Times convert to each visitor's time zone. -->
-        <div class="schedule" id="schedule"></div>
+        <div class="schedule carousel" id="schedule"></div>
       </div>
     </section>
 
@@ -312,10 +333,13 @@
           <span class="badge">Coming soon</span>
         </div>
         <!-- EDIT: swap these for real products when the store is ready -->
-        <div class="merch-grid">
+        <div class="merch-grid carousel">
           <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #1</div></div>
           <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #2</div></div>
           <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #3</div></div>
+          <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #4</div></div>
+          <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #5</div></div>
+          <div class="product"><div class="pimg">?</div><div class="pname">Mystery drop #6</div></div>
         </div>
       </div>
     </section>
@@ -330,7 +354,7 @@
           <a class="btn btn-primary" href="https://fuldraw.com" target="_blank" rel="noopener">Try it now</a>
         </div>
         <!-- Filled live from Fuldraw's Community Spotlight (see script at the bottom) -->
-        <div class="shots" id="shots"></div>
+        <div class="shots carousel" id="shots"></div>
       </div>
     </section>
 
@@ -338,7 +362,7 @@
       <div class="wrap">
         <h2><a class="h-link" href="https://www.youtube.com/@EthanSurnameYT/videos" target="_blank" rel="noopener">Latest videos</a></h2>
         <!-- Filled in automatically from videos.json, which a GitHub Action keeps up to date -->
-        <div class="video-grid" id="video-grid"></div>
+        <div class="video-grid carousel" id="video-grid"></div>
       </div>
     </section>
 
@@ -370,7 +394,7 @@
     document.querySelector("#quote .text").textContent = `“${q.text}”`;
     document.querySelector("#quote .by").textContent = `— Ethan ${q.year}`;
 
-    const SHOW = 6; // how many videos to show
+    const SHOW = 12; // how many videos to show
     const grid = document.getElementById("video-grid");
 
     function card(v) {
@@ -416,7 +440,7 @@
         const res = await fetch("videos.json", { cache: "no-cache" });
         videos = (await res.json()).videos || [];
       } catch {}
-      if (!videos.length) videos = Array.from({ length: 3 }, () => ({ title: "Stay tuned…" }));
+      if (!videos.length) videos = Array.from({ length: 4 }, () => ({ title: "Stay tuned…" }));
       grid.replaceChildren(...videos.slice(0, SHOW).map(card));
     }
     loadVideos();
@@ -446,12 +470,12 @@
       const first = guess - tzOffset(new Date(guess), tz);
       return new Date(guess - tzOffset(new Date(first), tz));
     }
-    function upcoming(s, now) {   // this stream's next two occurrences that haven't ended
+    function upcoming(s, now) {   // this stream's occurrences over the next two weeks that haven't ended
       const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
         timeZone: STREAM_TZ, year: "numeric", month: "numeric", day: "numeric",
       }).formatToParts(now).map((x) => [x.type, +x.value]));
       const [h, m] = s.time.split(":").map(Number), out = [];
-      for (let k = -1; k <= 14 && out.length < 2; k++) {
+      for (let k = -1; k <= 14; k++) {
         if (new Date(Date.UTC(p.year, p.month - 1, p.day + k)).getUTCDay() !== DAYS.indexOf(s.day)) continue;
         const start = zoned(p.year, p.month - 1, p.day + k, h, m, STREAM_TZ);
         const end = new Date(start.getTime() + s.hours * 3600e3);
@@ -483,7 +507,7 @@
     };
     const fmtRange = (s) => `${fmtTime(s.start)} – ${fmtTime(s.end, true)}`;
 
-    const MAX_LATER = 3;   // how many streams to show after the next one
+    const MAX_LATER = 8;   // how many streams to show after the next one
     function renderStreams() {
       const now = new Date();
       const list = STREAMS.flatMap((s) => upcoming(s, now)).sort((a, b) => a.start - b.start);
@@ -516,7 +540,6 @@
         el.querySelector(".what").textContent = s.title;
         return el;
       });
-      box.style.setProperty("--later", small.length);
       box.replaceChildren(big, ...small);
     }
     renderStreams();
@@ -525,8 +548,8 @@
     /* ---------------- Fuldraw: live from the Community Spotlight ----------------
        Reads the newest approved drawings straight from Fuldraw's public database,
        so this updates on its own whenever a drawing is approved. */
-    const SPOTLIGHT_URL = 'https://fuldraw-default-rtdb.firebaseio.com/spotlight.json?orderBy="$key"&limitToLast=8';
-    const SPOT_SHOW = 3;
+    const SPOTLIGHT_URL = 'https://fuldraw-default-rtdb.firebaseio.com/spotlight.json?orderBy="$key"&limitToLast=16';
+    const SPOT_SHOW = 12;
     const shotsBox = document.getElementById("shots");
 
     function shotTile(d) {
@@ -545,13 +568,13 @@
       return a;
     }
     function placeholderShots() {
-      shotsBox.replaceChildren(...Array.from({ length: SPOT_SHOW }, () => {
+      shotsBox.replaceChildren(...Array.from({ length: 4 }, () => {
         const el = document.createElement("div"); el.className = "shot"; return el;
       }));
     }
 
     async function loadSpotlight() {
-      shotsBox.replaceChildren(...Array.from({ length: SPOT_SHOW }, () => {
+      shotsBox.replaceChildren(...Array.from({ length: 4 }, () => {
         const el = document.createElement("div"); el.className = "shot loading"; return el;
       }));
       try {
@@ -572,7 +595,7 @@
     }
     // Reserve the space right away (no layout jump), then only download the drawings
     // when the visitor scrolls near the Fuldraw section.
-    shotsBox.replaceChildren(...Array.from({ length: SPOT_SHOW }, () => {
+    shotsBox.replaceChildren(...Array.from({ length: 4 }, () => {
       const el = document.createElement("div"); el.className = "shot loading"; return el;
     }));
     if ("IntersectionObserver" in window) {
@@ -661,13 +684,44 @@
     if (COMMUNITY.length) {
       wall.replaceChildren(...COMMUNITY.map(communityCard));
     } else {
-      wall.replaceChildren(...[220, 300, 180, 260, 200, 280].map((h) => {
+      wall.replaceChildren(...[240, 240, 240, 240].map((h) => {
         const el = document.createElement("div");
         el.className = "art empty";
         el.innerHTML = `<div class="ph" style="height:${h}px">Coming soon</div>`;
         return el;
       }));
     }
+
+    /* ---------------- Carousels ----------------
+       Shared tool: adds previous/next arrows (computers only; phones swipe) to every .carousel,
+       and hides each arrow when there's nothing more to scroll to in that direction. */
+    const ARROW = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+    function makeCarousel(row) {
+      const shell = document.createElement("div");
+      shell.className = "carousel-shell";
+      row.before(shell); shell.append(row);
+      const btn = (cls, label, path, dir) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "car-btn " + cls; b.setAttribute("aria-label", label); b.innerHTML = ARROW(path);
+        b.addEventListener("click", (e) => {
+          const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+          row.scrollBy({ left: dir * row.clientWidth * 0.85, behavior: smooth ? "smooth" : "auto" });
+          if (e.detail > 0) b.blur();   // mouse click: don't leave a focus ring behind
+        });
+        shell.append(b); return b;
+      };
+      const prev = btn("prev", "Previous", "M15 18l-6-6 6-6", -1);
+      const next = btn("next", "Next", "M9 18l6-6-6-6", 1);
+      const update = () => {
+        prev.hidden = row.scrollLeft <= 4;
+        next.hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+      };
+      row.addEventListener("scroll", update, { passive: true });
+      addEventListener("resize", update);
+      new MutationObserver(update).observe(row, { childList: true });   // content that loads later
+      update();
+    }
+    document.querySelectorAll(".carousel").forEach(makeCarousel);
 
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>

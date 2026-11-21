@@ -19,7 +19,7 @@ jobs:
       - name: Fetch newest uploads
         env:
           YT_HANDLE: EthanSurnameYT
-          MAX_VIDEOS: 6
+          MAX_VIDEOS: 12
         run: node scripts/update-videos.mjs
       - name: Commit if changed
         run: |
