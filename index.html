@@ -139,6 +139,8 @@
     .about p { font-size: 1.2rem; color: var(--muted); margin-bottom: 16px; }
 
     .lede { font-size: 1.2rem; color: var(--muted); max-width: 52ch; margin: -12px 0 28px; }
+    .section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 28px; }
+    .section-head h2 { margin: 0; }
     section.alt { background: var(--card); border-block: 3px solid var(--line); }
     .ticker + section.alt { border-top: 0; }
 
@@ -208,6 +210,9 @@
     @media (max-width: 720px) {
       nav { flex-wrap: wrap; gap: 10px; }
       nav ul { gap: 12px; font-size: .88rem; width: 100%; justify-content: space-between; }
+      .section-head { gap: 10px; }
+      .section-head h2 { font-size: 1.75rem; }
+      .section-head .btn { padding: 8px 14px; font-size: .85rem; box-shadow: 3px 3px 0 var(--line); }
       .fanart { columns: 2; column-gap: 12px; }
       .fanart:has(.embed, .post, .link) { columns: 1; }
       .art { margin-bottom: 12px; }
@@ -254,10 +259,12 @@
 
     <section id="community" class="alt">
       <div class="wrap">
-        <h2>Community</h2>
+        <div class="section-head">
+          <h2>Community</h2>
+          <a class="btn btn-primary" href="mailto:hello@2muchethan.com?subject=My%20creation">Submit your creation</a>
+        </div>
         <!-- Posts come from COMMUNITY in the script at the bottom -->
         <div class="fanart" id="fanart"></div>
-        <a class="btn btn-primary more" href="mailto:hello@2muchethan.com?subject=Fan%20art">Send your fan art</a>
       </div>
     </section>
 
