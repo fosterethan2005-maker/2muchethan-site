@@ -141,6 +141,7 @@
     .eyebrow { color: var(--accent); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .9rem; margin-bottom: 8px; }
     .lede { font-size: 1.2rem; color: var(--muted); max-width: 52ch; margin: -12px 0 28px; }
     section.alt { background: var(--card); border-block: 3px solid var(--line); }
+    .ticker + section.alt { border-top: 0; }
 
     /* Streams */
     .next {
@@ -215,10 +216,10 @@
     <nav>
       <a class="logo" href="/">2<span>Much</span>Ethan</a>
       <ul>
-        <li><a href="#videos">Videos</a></li>
-        <li><a href="#streams">Streams</a></li>
-        <li><a href="#fuldraw">Fuldraw</a></li>
         <li><a href="#community">Community</a></li>
+        <li><a href="#streams">Streams</a></li>
+        <li><a href="#videos">Videos</a></li>
+        <li><a href="#fuldraw">Fuldraw</a></li>
         <li><a href="#about">About</a></li>
       </ul>
     </nav>
@@ -245,16 +246,18 @@
       <div>NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★&nbsp;</div>
     </div>
 
-    <section id="videos">
+    <section id="community" class="alt">
       <div class="wrap">
-        <h2>Latest videos</h2>
-        <!-- Filled in automatically from videos.json, which a GitHub Action keeps up to date -->
-        <div class="video-grid" id="video-grid"></div>
-        <a class="btn btn-ghost more" href="https://www.youtube.com/@2muchethan/videos" target="_blank" rel="noopener">See all videos →</a>
+        <p class="eyebrow">Community</p>
+        <h2>Fan art wall</h2>
+        <p class="lede">Made something? Send it in and it might end up here.</p>
+        <!-- Art comes from FANART in the script at the bottom; put image files in a fanart/ folder -->
+        <div class="fanart" id="fanart"></div>
+        <a class="btn btn-primary more" href="mailto:hello@2muchethan.com?subject=Fan%20art">Send your fan art</a>
       </div>
     </section>
 
-    <section id="streams" class="alt">
+    <section id="streams">
       <div class="wrap">
         <p class="eyebrow">Live on YouTube</p>
         <h2>Stream schedule</h2>
@@ -262,6 +265,15 @@
         <div class="next" id="next-stream"></div>
         <div class="schedule" id="schedule"></div>
         <p class="tz-note" id="tz-note"></p>
+      </div>
+    </section>
+
+    <section id="videos" class="alt">
+      <div class="wrap">
+        <h2>Latest videos</h2>
+        <!-- Filled in automatically from videos.json, which a GitHub Action keeps up to date -->
+        <div class="video-grid" id="video-grid"></div>
+        <a class="btn btn-ghost more" href="https://www.youtube.com/@2muchethan/videos" target="_blank" rel="noopener">See all videos →</a>
       </div>
     </section>
 
@@ -284,17 +296,6 @@
         </div>
         <!-- Screenshots come from FULDRAW_SHOTS in the script at the bottom -->
         <div class="shots" id="shots"></div>
-      </div>
-    </section>
-
-    <section id="community" class="alt">
-      <div class="wrap">
-        <p class="eyebrow">Community</p>
-        <h2>Fan art wall</h2>
-        <p class="lede">Made something? Send it in and it might end up here.</p>
-        <!-- Art comes from FANART in the script at the bottom; put image files in a fanart/ folder -->
-        <div class="fanart" id="fanart"></div>
-        <a class="btn btn-primary more" href="mailto:hello@2muchethan.com?subject=Fan%20art">Send your fan art</a>
       </div>
     </section>
 
