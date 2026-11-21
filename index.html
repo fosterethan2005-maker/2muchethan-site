@@ -147,7 +147,7 @@
     .ticker + section { border-top: 0; padding-top: 40px; }
 
     /* Streams: one row, the next stream first and bigger (with a thumbnail) */
-    .schedule { display: grid; gap: 18px; align-items: start; }
+    .schedule { display: grid; gap: 18px; align-items: stretch; grid-template-columns: minmax(0, 2fr) repeat(var(--later, 3), minmax(0, 1fr)); }
     .slot { border: 3px solid var(--line); border-radius: 16px; padding: 18px 20px; background: var(--bg); }
     .slot .day { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
     .slot .time { font-weight: 700; margin-top: 2px; }
@@ -162,10 +162,14 @@
     .slot.next.live .label { color: var(--accent); }
     .slot.next .title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin: 2px 0 6px; }
     .slot.next .soon { color: var(--muted); }
-    .slot.next .btn { align-self: flex-start; margin-top: 14px; }
+    a.slot.next { color: inherit; text-decoration: none; transition: transform .15s ease-out; }
+    @media (hover: hover) and (pointer: fine) { a.slot.next:hover { transform: translateY(-2px); } }
+    a.slot.next:active { transform: scale(.98); }
+    .slot.later { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
     .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; margin-right: 8px; animation: pulse 1.4s infinite; }
     @keyframes pulse { 50% { opacity: .25; } }
-    @media (max-width: 720px) { .schedule { grid-template-columns: 1fr 1fr !important; } .slot.next { grid-column: 1 / -1; } }
+    @media (max-width: 720px) { .schedule { grid-template-columns: 1fr; } .slot.later { display: grid; grid-template-columns: 9.5rem 1fr; align-items: baseline; padding: 16px; } .slot.later .day { font-size: 1.1rem; } .slot.later .time { white-space: nowrap; } .slot.later > * { min-width: 0; } }
+    @media (max-width: 400px) { .slot.later { grid-template-columns: 1fr; gap: 4px; } }
 
     /* Merch */
     .badge { background: var(--accent-2); color: var(--on-accent-2); border: 3px solid var(--line); border-radius: 999px; padding: 6px 16px; font-weight: 800; transform: rotate(-3deg); }
@@ -234,7 +238,7 @@
 
     @media (max-width: 720px) {
       nav { flex-wrap: wrap; gap: 10px; }
-      nav ul { gap: 12px; font-size: .88rem; width: 100%; justify-content: space-between; }
+      nav ul { gap: 6px 12px; font-size: .88rem; width: 100%; justify-content: space-between; flex-wrap: wrap; }
       .section-head { gap: 10px; }
       .section-head h2 { font-size: 1.75rem; }
       .section-head .btn { padding: 8px 14px; font-size: .85rem; }
@@ -418,13 +422,13 @@
     loadVideos();
 
     /* ---------------- Stream schedule ----------------
-       EDIT: your weekly streams. "time" is 24-hour, in STREAM_TZ (Mountain time).
-       "thumb" is optional: an image for when that stream is the next one up.
-       Visitors see times in their own time zone; if their browser won't say, they see Mountain time. */
-    const STREAM_TZ = "America/Denver";
+       EDIT: your weekly streams. "time" is 24-hour MST (MST all year, no daylight saving).
+       Optional: "thumb" (image shown when it's the next stream) and "url" (link to that stream).
+       Visitors see times in their own time zone; if their browser won't say, they see MST. */
+    const STREAM_TZ = "America/Phoenix";   // MST all year
     const STREAMS = [
-      { day: "Mon", time: "17:00", hours: 2, title: "Fuldraw grind" },
-      { day: "Wed", time: "17:00", hours: 2, title: "Chat & chill" },
+      { day: "Mon", time: "17:00", hours: 3, title: "Fuldraw grind" },
+      { day: "Wed", time: "17:00", hours: 3, title: "Chat & chill" },
       { day: "Sat", time: "17:00", hours: 3, title: "Weekend marathon" },
     ];
     const CHANNEL = "https://www.youtube.com/@EthanSurnameYT";
@@ -442,17 +446,18 @@
       const first = guess - tzOffset(new Date(guess), tz);
       return new Date(guess - tzOffset(new Date(first), tz));
     }
-    function nextOccurrence(s, now) {
+    function upcoming(s, now) {   // this stream's next two occurrences that haven't ended
       const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
         timeZone: STREAM_TZ, year: "numeric", month: "numeric", day: "numeric",
       }).formatToParts(now).map((x) => [x.type, +x.value]));
-      const [h, m] = s.time.split(":").map(Number);
-      for (let k = -1; k <= 7; k++) {
+      const [h, m] = s.time.split(":").map(Number), out = [];
+      for (let k = -1; k <= 14 && out.length < 2; k++) {
         if (new Date(Date.UTC(p.year, p.month - 1, p.day + k)).getUTCDay() !== DAYS.indexOf(s.day)) continue;
         const start = zoned(p.year, p.month - 1, p.day + k, h, m, STREAM_TZ);
         const end = new Date(start.getTime() + s.hours * 3600e3);
-        if (end > now) return { ...s, start, end };
+        if (end > now) out.push({ ...s, start, end });
       }
+      return out;
     }
     function until(ms) {
       const m = Math.round(ms / 60e3), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60);
@@ -481,39 +486,37 @@
     const MAX_LATER = 3;   // how many streams to show after the next one
     function renderStreams() {
       const now = new Date();
-      const list = STREAMS.map((s) => nextOccurrence(s, now)).filter(Boolean).sort((a, b) => a.start - b.start);
+      const list = STREAMS.flatMap((s) => upcoming(s, now)).sort((a, b) => a.start - b.start);
       const box = document.getElementById("schedule");
       if (!list.length) { box.replaceChildren(); return; }
-      const [next, ...later] = [list[0], ...list.slice(1, 1 + MAX_LATER)];
+      const next = list[0], later = list.slice(1, 1 + MAX_LATER);
       const live = next.start <= now;
 
-      // the next stream: thumbnail, title, day, time, countdown, button
-      const big = document.createElement("article");
+      // the next stream: the whole card links to the stream
+      const big = document.createElement("a");
       big.className = "slot next" + (live ? " live" : "");
+      big.href = next.url || `${CHANNEL}/${live ? "live" : "streams"}`;
+      big.target = "_blank"; big.rel = "noopener";
       big.innerHTML = `<div class="thumb-s"></div><div class="body">
           <div class="label">${live ? '<span class="dot"></span>Live now' : "Next stream"}</div>
-          <div class="title"></div><div class="day"></div><div class="time"></div><div class="soon"></div>
-          <a class="btn btn-primary" target="_blank" rel="noopener"></a></div>`;
+          <div class="title"></div><div class="day"></div><div class="time"></div><div class="soon"></div></div>`;
       if (next.thumb) big.querySelector(".thumb-s").style.backgroundImage = `url("${encodeURI(next.thumb)}")`;
       big.querySelector(".title").textContent = next.title;
       big.querySelector(".day").textContent = fmtDay(next.start);
       big.querySelector(".time").textContent = fmtRange(next);
       big.querySelector(".soon").textContent = live ? "" : until(next.start - now);
-      const btn = big.querySelector(".btn");
-      btn.href = `${CHANNEL}/${live ? "live" : "streams"}`;
-      btn.textContent = live ? "Watch live" : "See streams";
 
-      // the ones after it: day, time, title
+      // the ones after it: same height as the next stream; day at the top, time and title at the bottom
       const small = later.map((s) => {
         const el = document.createElement("div");
-        el.className = "slot";
-        el.innerHTML = `<div class="day"></div><div class="time"></div><div class="what"></div>`;
+        el.className = "slot later";
+        el.innerHTML = `<div class="day"></div><div><div class="time"></div><div class="what"></div></div>`;
         el.querySelector(".day").textContent = fmtDay(s.start);
         el.querySelector(".time").textContent = fmtRange(s);
         el.querySelector(".what").textContent = s.title;
         return el;
       });
-      box.style.gridTemplateColumns = `minmax(0, 2fr)${" minmax(0, 1fr)".repeat(small.length)}`;
+      box.style.setProperty("--later", small.length);
       box.replaceChildren(big, ...small);
     }
     renderStreams();
