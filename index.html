@@ -138,7 +138,6 @@
     }
     .about p { font-size: 1.2rem; color: var(--muted); margin-bottom: 16px; }
 
-    .eyebrow { color: var(--accent); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .9rem; margin-bottom: 8px; }
     .lede { font-size: 1.2rem; color: var(--muted); max-width: 52ch; margin: -12px 0 28px; }
     section.alt { background: var(--card); border-block: 3px solid var(--line); }
     .ticker + section.alt { border-top: 0; }
@@ -191,6 +190,12 @@
     }
     .art .by { display: block; padding: 10px 14px; font-weight: 700; font-size: .95rem; }
     .art.empty { cursor: default; }
+    .art.embed, .art.post { cursor: default; }
+    .art iframe { width: 100%; border: 0; display: block; background: #000; }
+    .art .text { padding: 16px 16px 4px; font-size: 1.1rem; white-space: pre-line; }
+    .art .meta { display: block; padding: 4px 16px 14px; color: var(--muted); font-size: .9rem; }
+    .art .caption { display: block; padding: 10px 14px; font-weight: 700; font-size: .95rem; }
+    .art.link a { display: block; padding: 16px; font-weight: 800; word-break: break-all; }
     dialog { border: 3px solid var(--line); border-radius: 18px; padding: 0; max-width: min(92vw, 900px); background: var(--card); color: var(--ink); }
     dialog::backdrop { background: rgb(0 0 0 / .75); }
     dialog img { display: block; max-width: 100%; max-height: 80vh; }
@@ -204,6 +209,7 @@
       nav { flex-wrap: wrap; gap: 10px; }
       nav ul { gap: 12px; font-size: .88rem; width: 100%; justify-content: space-between; }
       .fanart { columns: 2; column-gap: 12px; }
+      .fanart:has(.embed, .post, .link) { columns: 1; }
       .art { margin-bottom: 12px; }
       .art .ph { max-height: 180px; }
       .about, .showcase { grid-template-columns: 1fr; gap: 32px; }
@@ -248,10 +254,8 @@
 
     <section id="community" class="alt">
       <div class="wrap">
-        <p class="eyebrow">Community</p>
-        <h2>Fan art wall</h2>
-        <p class="lede">Made something? Send it in and it might end up here.</p>
-        <!-- Art comes from FANART in the script at the bottom; put image files in a fanart/ folder -->
+        <h2>Community</h2>
+        <!-- Posts come from COMMUNITY in the script at the bottom -->
         <div class="fanart" id="fanart"></div>
         <a class="btn btn-primary more" href="mailto:hello@2muchethan.com?subject=Fan%20art">Send your fan art</a>
       </div>
@@ -259,7 +263,6 @@
 
     <section id="streams">
       <div class="wrap">
-        <p class="eyebrow">Live on YouTube</p>
         <h2>Stream schedule</h2>
         <!-- Edit STREAMS in the script at the bottom. Times convert to each visitor's time zone. -->
         <div class="next" id="next-stream"></div>
@@ -280,7 +283,6 @@
     <section id="fuldraw">
       <div class="wrap showcase">
         <div>
-          <p class="eyebrow">Showcase</p>
           <h2>Fuldraw</h2>
           <!-- EDIT: describe Fuldraw -->
           <p class="lede" style="margin-top:0">One or two sentences about what Fuldraw is and why people should try it.</p>
@@ -484,37 +486,89 @@
       return el;
     }));
 
-    /* ---------------- Fan art wall ----------------
-       EDIT: put images in a fanart/ folder and add them here (newest first). */
-    const FANART = [
-      // { src: "fanart/cool-drawing.jpg", by: "@artistname" },
+    /* ---------------- Community ----------------
+       EDIT: add posts here, newest first. Each one is one of:
+         { url: "https://www.youtube.com/watch?v=...", caption: "optional" }   YouTube video, Short or live
+         { url: "https://www.instagram.com/p/..." }                           Instagram post or reel
+         { url: "https://www.tiktok.com/@name/video/..." }                    TikTok
+         { url: "https://x.com/name/status/..." }                             X post
+         { text: "Your own post", date: "2026-11-21", image: "optional.jpg" } a text post
+         { image: "fanart/drawing.jpg", by: "@artist" }                       fan art (click to enlarge) */
+    const COMMUNITY = [
+      // { text: "Site is live!", date: "2026-11-21" },
     ];
+
+    function embedFor(url) {
+      let m;
+      if ((m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{11})/)))
+        return { src: `https://www.youtube-nocookie.com/embed/${m[1]}`, ratio: url.includes("/shorts/") ? "9/16" : "16/9" };
+      if ((m = url.match(/instagram\.com\/(p|reel|tv)\/([\w-]+)/)))
+        return { src: `https://www.instagram.com/${m[1]}/${m[2]}/embed`, height: 560 };
+      if ((m = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/)))
+        return { src: `https://www.tiktok.com/embed/v2/${m[1]}`, height: 740 };
+      if ((m = url.match(/(?:x|twitter)\.com\/[^/]+\/status\/(\d+)/)))
+        return { src: `https://platform.twitter.com/embed/Tweet.html?id=${m[1]}&dnt=true`, height: 520 };
+    }
+    const fmtDate = (d) => new Date(d + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     const viewer = document.getElementById("art-view");
     viewer.querySelector("button").onclick = () => viewer.close();
     viewer.onclick = (e) => { if (e.target === viewer) viewer.close(); };
-    const wall = document.getElementById("fanart");
-    if (FANART.length) {
-      wall.replaceChildren(...FANART.map((a) => {
-        const el = document.createElement("button");
-        el.type = "button"; el.className = "art";
-        const img = document.createElement("img");
-        img.src = a.src; img.alt = `Fan art by ${a.by}`; img.loading = "lazy";
-        const by = document.createElement("span");
-        by.className = "by"; by.textContent = `by ${a.by}`;
-        el.append(img, by);
-        el.onclick = () => {
-          viewer.querySelector("img").src = a.src;
-          viewer.querySelector("img").alt = img.alt;
-          viewer.querySelector("span").textContent = `by ${a.by}`;
-          viewer.showModal();
-        };
+    const add = (parent, tag, cls, text) => {
+      const el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (text != null) el.textContent = text;
+      parent.append(el); return el;
+    };
+
+    function communityCard(item) {
+      if (item.url) {
+        const e = embedFor(item.url);
+        const el = document.createElement("div");
+        if (!e) { // unknown site: plain link
+          el.className = "art link";
+          const a = add(el, "a", null, item.caption || item.url);
+          a.href = item.url; a.target = "_blank"; a.rel = "noopener";
+          return el;
+        }
+        el.className = "art embed";
+        const f = add(el, "iframe");
+        f.src = e.src; f.loading = "lazy"; f.title = item.caption || "Embedded post";
+        f.allow = "encrypted-media; picture-in-picture; clipboard-write"; f.allowFullscreen = true;
+        if (e.ratio) f.style.aspectRatio = e.ratio; else f.style.height = e.height + "px";
+        if (item.caption) add(el, "span", "caption", item.caption);
         return el;
-      }));
+      }
+      if (item.text) {
+        const el = document.createElement("div");
+        el.className = "art post";
+        if (item.image) { const img = add(el, "img"); img.src = item.image; img.alt = ""; img.loading = "lazy"; }
+        add(el, "p", "text", item.text);
+        if (item.date) add(el, "span", "meta", fmtDate(item.date));
+        return el;
+      }
+      // fan art image
+      const el = document.createElement("button");
+      el.type = "button"; el.className = "art";
+      const img = add(el, "img");
+      img.src = item.image; img.alt = item.by ? `Fan art by ${item.by}` : "Fan art"; img.loading = "lazy";
+      if (item.by) add(el, "span", "by", `by ${item.by}`);
+      el.onclick = () => {
+        viewer.querySelector("img").src = item.image;
+        viewer.querySelector("img").alt = img.alt;
+        viewer.querySelector("span").textContent = item.by ? `by ${item.by}` : "";
+        viewer.showModal();
+      };
+      return el;
+    }
+
+    const wall = document.getElementById("fanart");
+    if (COMMUNITY.length) {
+      wall.replaceChildren(...COMMUNITY.map(communityCard));
     } else {
       wall.replaceChildren(...[220, 300, 180, 260, 200, 280].map((h) => {
         const el = document.createElement("div");
         el.className = "art empty";
-        el.innerHTML = `<div class="ph" style="height:${h}px">Your art here</div>`;
+        el.innerHTML = `<div class="ph" style="height:${h}px">Coming soon</div>`;
         return el;
       }));
     }
