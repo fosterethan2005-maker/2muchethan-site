@@ -5,7 +5,7 @@ A one-page site for the 2MuchEthan YouTube channel. Plain HTML, nothing to insta
 ## Make it yours
 Open `index.html` and look for `EDIT:` comments:
 - **Tagline and bio**: change the text.
-- **Videos**: paste video IDs into the `videos` list near the bottom. For `youtube.com/watch?v=dQw4w9WgXcQ`, the ID is `dQw4w9WgXcQ`.
+- **Videos**: these update on their own. A GitHub Action (`.github/workflows/update-videos.yml`) checks the channel's feed every 3 hours and saves the newest uploads to `videos.json`. Change `YT_HANDLE` there if the handle isn't `2muchethan`. To update right away, open the repo's **Actions** tab → **Update latest videos** → **Run workflow**.
 - **Photo**: put `me.jpg` in this folder and swap the `E` circle for `<img src="me.jpg" class="avatar" alt="Ethan">`.
 - **Social links**: fix the handles and delete any you don't use.
 - **Email**: `hello@2muchethan.com` won't receive mail until you set up email forwarding at your registrar.
