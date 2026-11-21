@@ -58,7 +58,7 @@
     nav ul a:hover { color: var(--accent); }
 
     /* Hero */
-    .hero { padding-top: 56px; padding-bottom: 72px; }
+    .hero { padding-top: 56px; padding-bottom: 32px; }
     .hero h1, .hero-title .l1, .hero-title .l2 {
       font-size: clamp(3.4rem, 13vw, 9.5rem);
       line-height: 0.88;
@@ -89,11 +89,11 @@
       display: inline-flex; align-items: center; gap: 10px;
       padding: 14px 24px; border-radius: 999px;
       font-weight: 800; font-size: 1.05rem; text-decoration: none;
-      border: 3px solid var(--line);
+      border: 0;
       transition: transform .15s ease-out;
     }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-ghost { background: transparent; }
+    .btn-ghost { background: color-mix(in srgb, var(--ink) 8%, transparent); }
     @media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-2px); } }
     .btn:active { transform: scale(.97); }
     .btn { user-select: none; -webkit-touch-callout: none; }
@@ -144,28 +144,28 @@
     .section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 28px; }
     .section-head h2 { margin: 0; }
     section.alt { background: var(--card); border-block: 3px solid var(--line); }
-    .ticker + section.alt { border-top: 0; }
+    .ticker + section { border-top: 0; padding-top: 40px; }
 
-    /* Streams */
-    .next {
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;
-      background: var(--accent-2); color: var(--on-accent-2); border: 3px solid var(--line); border-radius: 20px;
-      padding: 24px 28px; box-shadow: 6px 6px 0 var(--line); margin-bottom: 28px;
+    /* Streams: one row, the next stream first and bigger (with a thumbnail) */
+    .schedule { display: grid; gap: 18px; align-items: start; }
+    .slot { border: 3px solid var(--line); border-radius: 16px; padding: 18px 20px; background: var(--bg); }
+    .slot .day { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+    .slot .time { font-weight: 700; margin-top: 2px; }
+    .slot .what { color: var(--muted); margin-top: 4px; }
+    .slot.next { padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 6px 6px 0 var(--line); }
+    .slot.next .thumb-s {
+      aspect-ratio: 16 / 9; border-bottom: 3px solid var(--line);
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-2-soft)) center / cover no-repeat;
     }
-    .next.live { background: var(--accent); color: #fff; }
-    .next .label { font-weight: 800; letter-spacing: .12em; font-size: .85rem; text-transform: uppercase; }
-    .next .title { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 800; line-height: 1.1; margin: 4px 0; }
-    .next .when { font-weight: 700; }
-    .next .btn { background: #16130f; color: #fff; border-color: #16130f; box-shadow: none; }
+    .slot.next .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+    .slot.next .label { font-weight: 800; letter-spacing: .12em; font-size: .8rem; text-transform: uppercase; color: var(--accent-2); }
+    .slot.next.live .label { color: var(--accent); }
+    .slot.next .title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin: 2px 0 6px; }
+    .slot.next .soon { color: var(--muted); }
+    .slot.next .btn { align-self: flex-start; margin-top: 14px; }
     .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; margin-right: 8px; animation: pulse 1.4s infinite; }
     @keyframes pulse { 50% { opacity: .25; } }
-    .schedule { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
-    .slot { border: 3px solid var(--line); border-radius: 16px; padding: 18px 20px; background: var(--bg); }
-    .slot.is-next { outline: 4px solid var(--accent); outline-offset: 3px; }
-    .slot .day { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
-    .slot .time { color: var(--accent); font-weight: 800; }
-    .slot .what { color: var(--muted); margin-top: 4px; }
-    .tz-note { color: var(--muted); margin-top: 18px; font-size: .95rem; }
+    @media (max-width: 720px) { .schedule { grid-template-columns: 1fr 1fr !important; } .slot.next { grid-column: 1 / -1; } }
 
     /* Merch */
     .badge { background: var(--accent-2); color: var(--on-accent-2); border: 3px solid var(--line); border-radius: 999px; padding: 6px 16px; font-weight: 800; transform: rotate(-3deg); }
@@ -294,9 +294,7 @@
       <div class="wrap">
         <h2>Stream schedule</h2>
         <!-- Edit STREAMS in the script at the bottom. Times convert to each visitor's time zone. -->
-        <div class="next" id="next-stream"></div>
         <div class="schedule" id="schedule"></div>
-        <p class="tz-note" id="tz-note"></p>
       </div>
     </section>
 
@@ -418,13 +416,14 @@
     loadVideos();
 
     /* ---------------- Stream schedule ----------------
-       EDIT: your weekly streams. "time" is 24-hour, in STREAM_TZ.
-       Visitors see everything converted to their own time zone. */
-    const STREAM_TZ = "America/New_York";
+       EDIT: your weekly streams. "time" is 24-hour, in STREAM_TZ (Mountain time).
+       "thumb" is optional: an image for when that stream is the next one up.
+       Visitors see times in their own time zone; if their browser won't say, they see Mountain time. */
+    const STREAM_TZ = "America/Denver";
     const STREAMS = [
-      { day: "Mon", time: "19:00", hours: 2, title: "Fuldraw grind" },
-      { day: "Wed", time: "19:00", hours: 2, title: "Chat & chill" },
-      { day: "Sat", time: "14:00", hours: 3, title: "Weekend marathon" },
+      { day: "Mon", time: "17:00", hours: 2, title: "Fuldraw grind" },
+      { day: "Wed", time: "17:00", hours: 2, title: "Chat & chill" },
+      { day: "Sat", time: "17:00", hours: 3, title: "Weekend marathon" },
     ];
     const CHANNEL = "https://www.youtube.com/@EthanSurnameYT";
 
@@ -459,42 +458,61 @@
       if (h) return `in ${h}h ${m % 60}m`;
       return `in ${Math.max(m, 1)}m`;
     }
-    const fmtDay = (d) => d.toLocaleDateString(undefined, { weekday: "long" });
-    const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    // The visitor's time zone, or Mountain time if their browser hides it (reports plain UTC).
+    const VIEW_TZ = (() => {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      return !tz || /^(UTC|Etc\/)/.test(tz) ? STREAM_TZ : tz;
+    })();
+    const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
+    const fmtDay = (d) => {   // "Monday 23rd"
+      const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: VIEW_TZ, weekday: "long", day: "numeric" })
+        .formatToParts(d).map((x) => [x.type, x.value]));
+      return `${p.weekday} ${ordinal(+p.day)}`;
+    };
+    const fmtTime = (d, withZone) => {   // "5 PM" or "5:30 PM MST"
+      const mins = +new Intl.DateTimeFormat("en-US", { timeZone: VIEW_TZ, minute: "numeric" }).format(d);
+      return d.toLocaleTimeString("en-US", { timeZone: VIEW_TZ, hour: "numeric", ...(mins ? { minute: "2-digit" } : {}),
+        ...(withZone ? { timeZoneName: "short" } : {}) });
+    };
+    const fmtRange = (s) => `${fmtTime(s.start)} – ${fmtTime(s.end, true)}`;
 
+    const MAX_LATER = 3;   // how many streams to show after the next one
     function renderStreams() {
       const now = new Date();
-      const list = STREAMS.map((s) => nextOccurrence(s, now)).filter(Boolean);
-      const next = [...list].sort((a, b) => a.start - b.start)[0];
-      const box = document.getElementById("next-stream");
-      if (!next) { box.hidden = true; return; }
+      const list = STREAMS.map((s) => nextOccurrence(s, now)).filter(Boolean).sort((a, b) => a.start - b.start);
+      const box = document.getElementById("schedule");
+      if (!list.length) { box.replaceChildren(); return; }
+      const [next, ...later] = [list[0], ...list.slice(1, 1 + MAX_LATER)];
       const live = next.start <= now;
-      box.className = "next" + (live ? " live" : "");
-      box.innerHTML = `<div>
-          <div class="label">${live ? '<span class="dot"></span>Live now' : "Next stream"}</div>
-          <div class="title"></div>
-          <div class="when"></div>
-        </div>
-        <a class="btn" href="${CHANNEL}/${live ? "live" : "streams"}" target="_blank" rel="noopener">${live ? "Watch live" : "See streams"}</a>`;
-      box.querySelector(".title").textContent = next.title;
-      box.querySelector(".when").textContent = live
-        ? `Started at ${fmtTime(next.start)}`
-        : `${fmtDay(next.start)}, ${fmtTime(next.start)} · ${until(next.start - now)}`;
 
-      // Weekly list, Monday first, in the visitor's own days
-      const sorted = [...list].sort((a, b) =>
-        ((a.start.getDay() + 6) % 7) - ((b.start.getDay() + 6) % 7) || a.start.getHours() - b.start.getHours());
-      document.getElementById("schedule").replaceChildren(...sorted.map((s) => {
+      // the next stream: thumbnail, title, day, time, countdown, button
+      const big = document.createElement("article");
+      big.className = "slot next" + (live ? " live" : "");
+      big.innerHTML = `<div class="thumb-s"></div><div class="body">
+          <div class="label">${live ? '<span class="dot"></span>Live now' : "Next stream"}</div>
+          <div class="title"></div><div class="day"></div><div class="time"></div><div class="soon"></div>
+          <a class="btn btn-primary" target="_blank" rel="noopener"></a></div>`;
+      if (next.thumb) big.querySelector(".thumb-s").style.backgroundImage = `url("${encodeURI(next.thumb)}")`;
+      big.querySelector(".title").textContent = next.title;
+      big.querySelector(".day").textContent = fmtDay(next.start);
+      big.querySelector(".time").textContent = fmtRange(next);
+      big.querySelector(".soon").textContent = live ? "" : until(next.start - now);
+      const btn = big.querySelector(".btn");
+      btn.href = `${CHANNEL}/${live ? "live" : "streams"}`;
+      btn.textContent = live ? "Watch live" : "See streams";
+
+      // the ones after it: day, time, title
+      const small = later.map((s) => {
         const el = document.createElement("div");
-        el.className = "slot" + (s === next ? " is-next" : "");
+        el.className = "slot";
         el.innerHTML = `<div class="day"></div><div class="time"></div><div class="what"></div>`;
         el.querySelector(".day").textContent = fmtDay(s.start);
-        el.querySelector(".time").textContent = `${fmtTime(s.start)} – ${fmtTime(s.end)}`;
+        el.querySelector(".time").textContent = fmtRange(s);
         el.querySelector(".what").textContent = s.title;
         return el;
-      }));
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      document.getElementById("tz-note").textContent = `Times shown in your time zone (${tz.replace(/_/g, " ")}).`;
+      });
+      box.style.gridTemplateColumns = `minmax(0, 2fr)${" minmax(0, 1fr)".repeat(small.length)}`;
+      box.replaceChildren(big, ...small);
     }
     renderStreams();
     setInterval(renderStreams, 60e3);
