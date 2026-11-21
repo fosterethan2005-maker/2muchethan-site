@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2MuchEthan</title>
+  <meta name="description" content="2MuchEthan on YouTube: new videos, way too much energy.">
+  <meta property="og:title" content="2MuchEthan">
+  <meta property="og:description" content="New videos, way too much energy.">
+  <meta property="og:url" content="https://2muchethan.com">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23ff3d2e'/><text x='50' y='70' font-size='60' font-family='Arial Black,Arial' font-weight='900' text-anchor='middle' fill='white'>2</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff8ef;
+      --ink: #16130f;
+      --muted: #6b6258;
+      --accent: #ff3d2e;
+      --accent-2: #ffd23f;
+      --card: #ffffff;
+      --line: #16130f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14110e;
+        --ink: #fff8ef;
+        --muted: #b3a89b;
+        --card: #1f1b17;
+        --line: #fff8ef;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Bricolage Grotesque", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+    /* Nav */
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+    .logo { font-weight: 800; font-size: 1.4rem; text-decoration: none; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    nav ul { list-style: none; display: flex; gap: 22px; padding: 0; }
+    nav ul a { text-decoration: none; font-weight: 700; }
+    nav ul a:hover { color: var(--accent); }
+
+    /* Hero */
+    .hero { padding-top: 56px; padding-bottom: 72px; }
+    .hero h1 {
+      font-size: clamp(3.4rem, 13vw, 9.5rem);
+      line-height: 0.88;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+    }
+    .hero h1 .two {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0 0.12em;
+      border-radius: 0.12em;
+      transform: rotate(-4deg);
+    }
+    .hero h1 .much { color: var(--accent); }
+    .hero p { font-size: clamp(1.1rem, 2.4vw, 1.4rem); color: var(--muted); max-width: 34ch; margin-top: 24px; }
+    .btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 32px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 24px; border-radius: 999px;
+      font-weight: 800; font-size: 1.05rem; text-decoration: none;
+      border: 3px solid var(--line);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 5px 5px 0 var(--line); }
+    .btn-ghost { background: transparent; }
+    .btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--line); }
+    .btn svg { width: 22px; height: 22px; }
+
+    /* Ticker */
+    .ticker {
+      background: var(--accent-2); color: #16130f;
+      border-block: 3px solid var(--line);
+      overflow: hidden; white-space: nowrap;
+      font-weight: 800; font-size: 1.3rem; padding: 12px 0;
+    }
+    .ticker div { display: inline-block; animation: scroll 28s linear infinite; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) { .ticker div { animation: none; } }
+
+    /* Sections */
+    section { padding: 72px 0; }
+    h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 28px; }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
+    .video {
+      background: var(--card); border: 3px solid var(--line); border-radius: 18px;
+      overflow: hidden; box-shadow: 6px 6px 0 var(--line);
+    }
+    .video .frame { aspect-ratio: 16/9; background: #000; }
+    .video iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .video .placeholder {
+      width: 100%; height: 100%; display: grid; place-items: center;
+      background: repeating-linear-gradient(45deg, var(--accent) 0 18px, #ff5a4d 18px 36px);
+      color: #fff; font-weight: 800; font-size: 1.1rem; text-align: center; padding: 12px;
+    }
+    .video h3 { padding: 16px 18px; font-size: 1.1rem; }
+
+    .about { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: center; }
+    .avatar {
+      aspect-ratio: 1; border-radius: 50%; border: 4px solid var(--line);
+      background: var(--accent-2); display: grid; place-items: center;
+      font-size: clamp(4rem, 12vw, 8rem); font-weight: 800; color: #16130f;
+      box-shadow: 8px 8px 0 var(--accent); max-width: 340px;
+    }
+    .about p { font-size: 1.2rem; color: var(--muted); margin-bottom: 16px; }
+
+    .socials { display: flex; flex-wrap: wrap; gap: 14px; }
+    footer { border-top: 3px solid var(--line); padding: 28px 0; color: var(--muted); }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+    @media (max-width: 720px) {
+      nav ul { gap: 14px; font-size: .95rem; }
+      .about { grid-template-columns: 1fr; gap: 32px; }
+      .avatar { max-width: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <nav>
+      <a class="logo" href="/">2<span>Much</span>Ethan</a>
+      <ul>
+        <li><a href="#videos">Videos</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#links">Links</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <h1><span class="two">2</span> <span class="much">Much</span><br>Ethan.</h1>
+      <!-- EDIT: your tagline -->
+      <p>New videos every week. Way too much energy. You've been warned.</p>
+      <div class="btns">
+        <a class="btn btn-primary" href="https://www.youtube.com/@2muchethan?sub_confirmation=1" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+          Subscribe
+        </a>
+        <a class="btn btn-ghost" href="#videos">Watch latest</a>
+      </div>
+    </div>
+
+    <div class="ticker" aria-hidden="true">
+      <div>NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★ NEW VIDEOS ★ TOO MUCH ★ HIT SUBSCRIBE ★ 2MUCHETHAN ★&nbsp;</div>
+    </div>
+
+    <section id="videos">
+      <div class="wrap">
+        <h2>Latest videos</h2>
+        <!-- EDIT: put your video IDs in the list in the script at the bottom of this file -->
+        <div class="video-grid" id="video-grid"></div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="wrap about">
+        <!-- EDIT: swap this for <img src="me.jpg" class="avatar" alt="Ethan"> -->
+        <div class="avatar">E</div>
+        <div>
+          <h2>Hey, I'm Ethan.</h2>
+          <!-- EDIT: your bio -->
+          <p>I make videos about whatever I'm way too into this week. Sometimes it goes well. Sometimes it really doesn't.</p>
+          <p>Business inquiries: <a href="mailto:hello@2muchethan.com">hello@2muchethan.com</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="links">
+      <div class="wrap">
+        <h2>Find me everywhere</h2>
+        <!-- EDIT: fix handles, delete any you don't use -->
+        <div class="socials">
+          <a class="btn btn-primary" href="https://www.youtube.com/@2muchethan" target="_blank" rel="noopener">YouTube</a>
+          <a class="btn btn-ghost" href="https://www.tiktok.com/@2muchethan" target="_blank" rel="noopener">TikTok</a>
+          <a class="btn btn-ghost" href="https://www.instagram.com/2muchethan" target="_blank" rel="noopener">Instagram</a>
+          <a class="btn btn-ghost" href="https://x.com/2muchethan" target="_blank" rel="noopener">X</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="year"></span> 2MuchEthan</span>
+      <span>Made with too much caffeine.</span>
+    </div>
+  </footer>
+
+  <script>
+    // EDIT: paste video IDs here (the part after "watch?v=" in a YouTube link)
+    const videos = [
+      { id: "", title: "Your newest video" },
+      { id: "", title: "Another banger" },
+      { id: "", title: "The one everyone asks about" },
+    ];
+
+    const grid = document.getElementById("video-grid");
+    for (const v of videos) {
+      const card = document.createElement("article");
+      card.className = "video";
+      const frame = v.id
+        ? `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}" title="${v.title}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+        : `<div class="placeholder">Add a video ID<br>in index.html</div>`;
+      card.innerHTML = `<div class="frame">${frame}</div><h3></h3>`;
+      card.querySelector("h3").textContent = v.title;
+      grid.appendChild(card);
+    }
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
