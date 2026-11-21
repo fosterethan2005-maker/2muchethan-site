@@ -8,7 +8,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 
-const HANDLE = process.env.YT_HANDLE || "2muchethan";
+const HANDLE = process.env.YT_HANDLE || "EthanSurnameYT";
 const MAX = Number(process.env.MAX_VIDEOS || 6);
 const OUT = new URL("../videos.json", import.meta.url);
 const UA = { "User-Agent": "Mozilla/5.0 (site video updater)", "Accept-Language": "en" };
