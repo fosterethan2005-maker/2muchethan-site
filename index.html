@@ -227,7 +227,6 @@
     dialog button { font: inherit; font-weight: 800; background: none; border: 0; color: var(--accent); cursor: pointer; }
 
     /* Carousels: every section's media is one sideways-scrolling row */
-    .carousel-shell { position: relative; }
     .carousel {
       display: flex; gap: 18px; overflow-x: auto; overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory; scrollbar-width: none;
@@ -244,21 +243,11 @@
     .merch-grid { --card-w: 240px; }
     #shots { --card-w: 380px; }
     #video-grid { --card-w: 320px; }
-    .car-btn { display: none; }
-    @media (hover: hover) and (pointer: fine) {
-      .car-btn {
-        display: grid; place-items: center; position: absolute; top: 50%; z-index: 2;
-        width: 44px; height: 44px; margin-top: -29px; border-radius: 50%; border: 0; cursor: pointer;
-        background: var(--ink); color: var(--bg); transition: transform .15s ease-out;
-        user-select: none;
-      }
-      .car-btn svg { width: 22px; height: 22px; }
-      .car-btn.prev { left: -14px; }
-      .car-btn.next { right: -14px; }
-      .car-btn:hover { transform: scale(1.06); }
-      .car-btn:active { transform: scale(.94); }
-      .car-btn[hidden] { display: none; }
-    }
+    /* computers: click and drag to slide (phones and trackpads swipe natively) */
+    @media (hover: hover) and (pointer: fine) { .carousel { cursor: grab; } }
+    .carousel.dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+    .carousel.dragging * { pointer-events: none; }
+    .carousel img { -webkit-user-drag: none; user-select: none; }
 
     footer { border-top: 3px solid var(--line); padding: 28px 0; color: var(--muted); }
     footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
@@ -694,33 +683,43 @@
     }
 
     /* ---------------- Carousels ----------------
-       Shared tool: adds previous/next arrows (computers only; phones swipe) to every .carousel,
-       and hides each arrow when there's nothing more to scroll to in that direction. */
-    const ARROW = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+       Shared tool: lets a mouse click-and-drag any .carousel sideways, with a little glide
+       when you let go. Touch screens and trackpads already swipe on their own. */
     function makeCarousel(row) {
-      const shell = document.createElement("div");
-      shell.className = "carousel-shell";
-      row.before(shell); shell.append(row);
-      const btn = (cls, label, path, dir) => {
-        const b = document.createElement("button");
-        b.type = "button"; b.className = "car-btn " + cls; b.setAttribute("aria-label", label); b.innerHTML = ARROW(path);
-        b.addEventListener("click", (e) => {
-          const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-          row.scrollBy({ left: dir * row.clientWidth * 0.85, behavior: smooth ? "smooth" : "auto" });
-          if (e.detail > 0) b.blur();   // mouse click: don't leave a focus ring behind
-        });
-        shell.append(b); return b;
-      };
-      const prev = btn("prev", "Previous", "M15 18l-6-6 6-6", -1);
-      const next = btn("next", "Next", "M9 18l6-6-6-6", 1);
-      const update = () => {
-        prev.hidden = row.scrollLeft <= 4;
-        next.hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
-      };
-      row.addEventListener("scroll", update, { passive: true });
-      addEventListener("resize", update);
-      new MutationObserver(update).observe(row, { childList: true });   // content that loads later
-      update();
+      let startX = 0, startScroll = 0, lastX = 0, lastT = 0, speed = 0, moved = false, down = false, glide = 0;
+      row.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "mouse" || e.button !== 0) return;
+        cancelAnimationFrame(glide);
+        down = true; moved = false;
+        startX = lastX = e.clientX; startScroll = row.scrollLeft; lastT = performance.now(); speed = 0;
+      });
+      addEventListener("pointermove", (e) => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        if (!moved && Math.abs(dx) > 5) { moved = true; row.classList.add("dragging"); }
+        if (!moved) return;
+        const now = performance.now();
+        speed = (e.clientX - lastX) / Math.max(1, now - lastT);   // pixels per millisecond
+        lastX = e.clientX; lastT = now;
+        row.scrollLeft = startScroll - dx;
+      });
+      addEventListener("pointerup", () => {
+        if (!down) return;
+        down = false;
+        if (!moved) return;
+        // glide a little in the direction of the throw, then let the row snap to a card
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let v = reduce ? 0 : -speed * 16;   // pixels per frame
+        const step = () => {
+          if (Math.abs(v) < 0.5) { row.classList.remove("dragging"); return; }
+          row.scrollLeft += v; v *= 0.92;
+          glide = requestAnimationFrame(step);
+        };
+        step();
+      });
+      // a drag must not count as a click on the card underneath
+      row.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+      row.addEventListener("dragstart", (e) => e.preventDefault());
     }
     document.querySelectorAll(".carousel").forEach(makeCarousel);
 
