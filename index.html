@@ -129,15 +129,6 @@
     .video .thumb:hover::after, .video .thumb:focus-visible::after { transform: scale(1.12); }
     .more { margin-top: 32px; }
 
-    .about { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: center; }
-    .avatar {
-      aspect-ratio: 1; border-radius: 50%; border: 4px solid var(--line);
-      background: var(--accent-2); display: grid; place-items: center;
-      font-size: clamp(4rem, 12vw, 8rem); font-weight: 800; color: #16130f;
-      box-shadow: 8px 8px 0 var(--accent); max-width: 340px;
-    }
-    .about p { font-size: 1.2rem; color: var(--muted); margin-bottom: 16px; }
-
     .lede { font-size: 1.2rem; color: var(--muted); max-width: 52ch; margin: -12px 0 28px; }
     .section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 28px; }
     .section-head h2 { margin: 0; }
@@ -217,8 +208,7 @@
       .fanart:has(.embed, .post, .link) { columns: 1; }
       .art { margin-bottom: 12px; }
       .art .ph { max-height: 180px; }
-      .about, .showcase { grid-template-columns: 1fr; gap: 32px; }
-      .avatar { max-width: 220px; }
+      .showcase { grid-template-columns: 1fr; gap: 32px; }
     }
   </style>
 </head>
@@ -231,7 +221,6 @@
         <li><a href="#streams">Streams</a></li>
         <li><a href="#videos">Videos</a></li>
         <li><a href="#fuldraw">Fuldraw</a></li>
-        <li><a href="#about">About</a></li>
       </ul>
     </nav>
   </header>
@@ -299,25 +288,11 @@
             <li>Cool feature number three</li>
           </ul>
           <div class="btns">
-            <!-- EDIT: link to where people can get/play it -->
-            <a class="btn btn-primary" href="#" target="_blank" rel="noopener">Try Fuldraw</a>
+            <a class="btn btn-primary" href="https://fuldraw.com" target="_blank" rel="noopener">Try Fuldraw</a>
           </div>
         </div>
         <!-- Screenshots come from FULDRAW_SHOTS in the script at the bottom -->
         <div class="shots" id="shots"></div>
-      </div>
-    </section>
-
-    <section id="about">
-      <div class="wrap about">
-        <!-- EDIT: swap this for <img src="me.jpg" class="avatar" alt="Ethan"> -->
-        <div class="avatar">E</div>
-        <div>
-          <h2>Hey, I'm Ethan.</h2>
-          <!-- EDIT: your bio -->
-          <p>I make videos about whatever I'm way too into this week. Sometimes it goes well. Sometimes it really doesn't.</p>
-          <p>Business inquiries: <a href="mailto:hello@2muchethan.com">hello@2muchethan.com</a></p>
-        </div>
       </div>
     </section>
 
