@@ -73,6 +73,8 @@
     }
     .hero h1 .much { color: var(--accent); }
     .hero p { font-size: clamp(1.1rem, 2.4vw, 1.4rem); color: var(--muted); max-width: 34ch; margin-top: 24px; }
+    .quote .text { font-style: italic; }
+    .quote .by { color: var(--accent); font-weight: 700; white-space: nowrap; }
     .btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 32px; }
     .btn {
       display: inline-flex; align-items: center; gap: 10px;
@@ -160,8 +162,8 @@
   <main>
     <div class="wrap hero">
       <h1><span class="two">2</span> <span class="much">Much</span><br>Ethan.</h1>
-      <!-- EDIT: your tagline -->
-      <p>New videos every week. Way too much energy. You've been warned.</p>
+      <!-- Picked at random from the QUOTES list in the script at the bottom -->
+      <p class="quote" id="quote"><span class="text">“Quote”</span> <span class="by">— Ethan2026</span></p>
       <div class="btns">
         <a class="btn btn-primary" href="https://www.youtube.com/@2muchethan?sub_confirmation=1" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
@@ -210,6 +212,15 @@
   </footer>
 
   <script>
+    // QUOTES: add as many as you like. One is picked at random on every visit.
+    const QUOTES = [
+      { text: "Quote", by: "Ethan2026" },
+      // { text: "Another quote here", by: "Ethan2026" },
+    ];
+    const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    document.querySelector("#quote .text").textContent = `“${q.text}”`;
+    document.querySelector("#quote .by").textContent = `— ${q.by}`;
+
     const SHOW = 6; // how many videos to show
     const grid = document.getElementById("video-grid");
 
